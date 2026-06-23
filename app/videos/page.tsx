@@ -23,6 +23,7 @@ export default async function VideosPage() {
             playbackId={video.playback_ids[0]?.id || ""}
             title={video.meta?.title || ""}
             order={index}
+            duration={video.duration}
           />
         ))}
       </div>
