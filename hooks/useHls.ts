@@ -13,11 +13,14 @@ interface UseHlsReturn {
   togglePlay: () => void;
   seekTo: (time: number) => void;
   isLoading: boolean;
+  isMuted: boolean;
+  toggleMute: () => void;
 }
 
 interface UseHlsOptions {
   startTime?: number; // resume playback from this position (seconds)
   onTimeUpdate?: (time: number) => void; // fires on every timeupdate, for callers tracking position externally
+  startMuted?: boolean;
 }
 
 export function useHls(
@@ -32,6 +35,7 @@ export function useHls(
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(options?.startMuted ?? true);
   const [levels, setLevels] = useState<{ height: number; bitrate: number }[]>(
     [],
   );
@@ -109,6 +113,7 @@ export function useHls(
     };
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
+    const onVolumeChange = () => setIsMuted(video.muted);
 
     video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("durationchange", onDurationChange);
@@ -121,6 +126,7 @@ export function useHls(
     video.addEventListener("waiting", () => {
       setIsLoading(true);
     });
+    video.addEventListener("volumechange", onVolumeChange);
 
     return () => {
       video.removeEventListener("timeupdate", onTimeUpdate);
@@ -128,6 +134,7 @@ export function useHls(
       video.removeEventListener("progress", onProgress);
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
+      video.removeEventListener("volumechange", onVolumeChange);
     };
   }, []);
 
@@ -135,6 +142,12 @@ export function useHls(
     const video = videoRef.current;
     if (!video) return;
     video.paused ? video.play() : video.pause();
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted; // fires "volumechange" → syncs isMuted automatically
   };
 
   const seekTo = (time: number) => {
@@ -159,5 +172,7 @@ export function useHls(
     togglePlay,
     seekTo,
     isLoading,
+    toggleMute,
+    isMuted,
   };
 }

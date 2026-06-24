@@ -4,6 +4,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { PreviewPlayer } from "../VideoPlayer/PreviewPlayer";
+import TimerBadge from "../TimerBadge/TimerBadge";
 
 type Props = {
   playbackId: string;
@@ -12,13 +13,6 @@ type Props = {
   onClick?: () => void;
   order: number;
 };
-
-function formatDuration(seconds?: number) {
-  if (!seconds) return null;
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
 
 const CardPlayer = ({ playbackId, title, duration, onClick, order }: Props) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -72,6 +66,7 @@ const CardPlayer = ({ playbackId, title, duration, onClick, order }: Props) => {
               width={640}
               height={360}
               priority={order < 4}
+              fetchPriority={order === 0 ? "high" : "auto"}
             />
 
             {/* Darken on hover for legibility */}
@@ -99,9 +94,9 @@ const CardPlayer = ({ playbackId, title, duration, onClick, order }: Props) => {
 
             {/* Duration badge */}
             {duration ? (
-              <span className="absolute bottom-2 right-2 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-medium text-white">
-                {formatDuration(duration)}
-              </span>
+              <div className="absolute bottom-2 right-2">
+                <TimerBadge duration={duration} isStatic />
+              </div>
             ) : null}
 
             <div
