@@ -24,6 +24,7 @@ export default async function VideosPage() {
             title={video.meta?.title || ""}
             order={index}
             duration={video.duration}
+            assetId={video.id}
           />
         ))}
       </div>

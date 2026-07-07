@@ -2,21 +2,22 @@
 
 import { useDebounce } from "@/hooks/useDebounce";
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { MouseEventHandler, useMemo, useRef, useState } from "react";
 import { PreviewPlayer } from "../VideoPlayer/PreviewPlayer";
 import TimerBadge from "../TimerBadge/TimerBadge";
+import { useRouter } from "next/navigation";
 
 type Props = {
   playbackId: string;
   title?: string;
   duration?: number; // in seconds
-  onClick?: () => void;
   order: number;
+  assetId: string;
 };
 
-const CardPlayer = ({ playbackId, title, duration, onClick, order }: Props) => {
+const CardPlayer = ({ playbackId, title, duration, order, assetId }: Props) => {
   const [isHovered, setIsHovered] = useState(false);
-
+  const router = useRouter();
   // Lives on the PARENT, which never unmounts on hover in/out —
   // so this value survives even though HoverPreview (and its useHls
   // instance) gets destroyed every time the mouse leaves.
@@ -32,10 +33,15 @@ const CardPlayer = ({ playbackId, title, duration, onClick, order }: Props) => {
     return (lastTimeRef.current / duration) * 100;
   }, [lastTimeRef.current, duration]);
 
+  const handleClickCard = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    router.push(`/videos/${assetId}`);
+  };
+
   const thumbnailUrl = `https://image.mux.com/${playbackId}/thumbnail.jpg?width=640&height=360&fit_mode=smartcrop&time=5`;
   return (
     <button
-      onClick={onClick}
+      onClick={handleClickCard}
       onMouseOver={delayHover}
       onMouseLeave={() => {
         clearTimeout(timeoutIdRef.current);
